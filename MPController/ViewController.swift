@@ -68,7 +68,7 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate, MCSessi
     
     @IBAction func actionTapped(sender: AnyObject) {
      
-        let dict = ["type":"button", "index":NSNumber(int: 0)]
+        let dict = ["action":"fire"]
         let dictData = NSKeyedArchiver.archivedDataWithRootObject(dict)
         
         do {
@@ -125,9 +125,12 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate, MCSessi
                         self.joypadBase.center.y - CGFloat(sin(touchAngle) * maxRadius))
                 }
                 
-                if self.session.connectedPeers.count == 1 {
+                if self.session.connectedPeers.count >= 1 {
                 
-                    let dict = ["type":"move", "touchDistance":NSNumber(float: touchDistance), "touchAngle":NSNumber(float: touchAngle)]
+                    let dict = [
+                        "action":"move",
+                        "touchDistance":NSNumber(float: touchDistance),
+                        "touchAngle":NSNumber(float: touchAngle)]
                     let dictData = NSKeyedArchiver.archivedDataWithRootObject(dict)
                     
                     do {
@@ -138,6 +141,15 @@ class ViewController: UIViewController, MCBrowserViewControllerDelegate, MCSessi
                 }
             }
             else if(recognizer.state == .Ended) {
+                
+                let dict = ["action":"release"]
+                let dictData = NSKeyedArchiver.archivedDataWithRootObject(dict)
+                
+                do {
+                    try self.session.sendData(dictData, toPeers: self.session.connectedPeers, withMode: .Reliable)
+                } catch {
+                    print("error sending data")
+                }
                 
                 UIView.animateWithDuration(0.5, animations: { () -> Void in
                     
